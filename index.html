@@ -431,6 +431,48 @@
         const currentBankEl = document.getElementById('current-bank');
         const footerTextEl = document.getElementById('footer-text');
         
+        // 从 localStorage 加载已生成题目记录
+        function loadFromLocalStorage() {
+            try {
+                // 加载软件工程题库记录
+                const softwareData = localStorage.getItem('softwareGeneratedIds');
+                if (softwareData) {
+                    softwareGeneratedIds = new Set(JSON.parse(softwareData));
+                }
+                
+                // 加载Java题库记录
+                const javaData = localStorage.getItem('javaGeneratedIds');
+                if (javaData) {
+                    javaGeneratedIds = new Set(JSON.parse(javaData));
+                }
+                
+                // 根据当前题库设置已生成题目ID
+                if (currentBank === "software") {
+                    previouslyGeneratedQuestionIds = new Set(softwareGeneratedIds);
+                } else {
+                    previouslyGeneratedQuestionIds = new Set(javaGeneratedIds);
+                }
+                
+                // 更新统计数据
+                updateStats();
+            } catch (error) {
+                console.error("从localStorage加载数据失败:", error);
+            }
+        }
+        
+        // 保存到 localStorage
+        function saveToLocalStorage() {
+            try {
+                // 保存软件工程题库记录
+                localStorage.setItem('softwareGeneratedIds', JSON.stringify([...softwareGeneratedIds]));
+                
+                // 保存Java题库记录
+                localStorage.setItem('javaGeneratedIds', JSON.stringify([...javaGeneratedIds]));
+            } catch (error) {
+                console.error("保存到localStorage失败:", error);
+            }
+        }
+        
         // 切换题库
         function switchQuestionBank() {
             // 保存当前题库的生成记录
@@ -479,6 +521,9 @@
             
             // 更新统计数据
             updateStats();
+            
+            // 保存到localStorage
+            saveToLocalStorage();
         }
         
         // 更新统计数据
@@ -608,6 +653,9 @@
             } else {
                 javaGeneratedIds = new Set(previouslyGeneratedQuestionIds);
             }
+            
+            // 保存到localStorage
+            saveToLocalStorage();
         }
         
         // 显示题目
@@ -775,6 +823,9 @@
                 javaGeneratedIds.clear();
             }
             
+            // 保存到localStorage
+            saveToLocalStorage();
+            
             questionsContainer.innerHTML = `
                 <div class="empty-state">
                     <h3>${currentBankName}题库已重置</h3>
@@ -804,6 +855,7 @@
         switchBankBtn.addEventListener('click', switchQuestionBank);
         
         // 初始化
+        loadFromLocalStorage(); // 先从localStorage加载
         updateStats();
         initBankInfo();
     </script>
